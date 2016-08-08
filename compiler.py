@@ -310,3 +310,28 @@ def tokenizer(string):
 
 """
 
+def parser(tokens):
+    tokens = tokens
+    curr = 0
+    def walk(curr):
+        token = tokens[curr]
+        if (token['type'] == 'number'):
+            curr += 1
+            return curr,{'type': 'NumberLiteral', 'value': token['value']}
+        if (token['type'] == 'paren' and token['value'] == '('):
+            curr += 1
+            token = tokens[curr]
+            node = {'type': 'CallExpression', 'name': token['value'], 'params': []}
+            curr += 1
+            token = tokens[curr]
+            while (not (token['type'] == 'paren' and token['value'] == ')')):
+                curr, params = walk(curr)
+                node['params'].append(params)
+                token = tokens[curr]
+            curr += 1
+            return curr, node
+    ast = {'type': 'Program', 'body': []}
+    while (curr < len(tokens)):
+        curr, node = walk(curr)
+        ast['body'].append(node)
+    return ast
